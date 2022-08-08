@@ -1,0 +1,55 @@
+services:
+    webserver:
+      build: docker/nginx
+      container_name: ${DOCKER_CONTAINER_NAME}-webserver
+      user: root
+      working_dir: /application
+      volumes:
+        - ./:/application
+        - ./docker/nginx/templates:/etc/nginx/templates
+      environment:
+        - NGINX_DOCKER_CONTAINER_NAME=${DOCKER_CONTAINER_NAME}
+      ports:
+        - "${DOCKER_WEBSERVER_EXTERNAL_PORT}:80"
+
+    redis:
+      image: redis:6.0
+      container_name: ${DOCKER_CONTAINER_NAME}-redis
+      restart: unless-stopped
+
+    mysql:    
+      image: mysql:5.7  
+      container_name: ${DOCKER_CONTAINER_NAME}-mysql
+      volumes:  
+       - mysqldata:/var/lib/mysql 
+      environment:  
+       MYSQL_ROOT_PASSWORD: root
+       MYSQL_DATABASE: db
+       MYSQL_USER: user
+       MYSQL_PASSWORD: pass
+      ports:
+        - "${DOCKER_MYSQL_EXTERNAL_PORT}:3306"
+
+    php-fpm:
+      build:
+        context: ./
+        dockerfile: docker/php-fpm/Dockerfile
+      container_name: ${DOCKER_CONTAINER_NAME}-php
+      working_dir: /application
+      depends_on:
+        - mysql
+      ports:
+        - ${DOCKER_SUPERVISOR_EXTERNAL_PORT}:1597
+        - ${DOCKER_LARAVELS_EXTERNAL_PORT}:${LARAVELS_LISTEN_PORT}
+      volumes:
+        - ./:/application
+      command: bash -c 'php artisan optimize &&
+                          php artisan migrate &&
+                          php artisan db:seed &&
+                          supervisord -c /etc/supervisor/supervisord.conf &&
+                          php-fpm'
+
+volumes:
+  mysqldata:
+    driver: local
+
