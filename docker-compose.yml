@@ -43,11 +43,13 @@ services:
         - ${DOCKER_LARAVELS_EXTERNAL_PORT}:${LARAVELS_LISTEN_PORT}
       volumes:
         - ./:/application
-      command: bash -c 'php artisan optimize &&
-                          php artisan migrate &&
-                          php artisan db:seed &&
-                          supervisord -c /etc/supervisor/supervisord.conf &&
-                          php-fpm'
+      #command: bash -c 'php artisan key:generate &&
+      #                    php artisan optimize &&
+      #                    php artisan migrate &&
+      #                    php artisan db:seed &&
+      #                    supervisord -c /etc/supervisor/supervisord.conf &&
+      #                    php-fpm'
+      command: bash -c 'supervisord -c /etc/supervisor/supervisord.conf && php-fpm'
 
 volumes:
   mysqldata:

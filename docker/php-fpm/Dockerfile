@@ -58,11 +58,11 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 COPY docker/php-fpm/supervisord.conf /etc/supervisor/supervisord.conf
 COPY docker/php-fpm/workers.conf /etc/supervisor/conf.d/workers.conf
 
-COPY / /application
+#COPY / /application
 
-USER www-data
-RUN cd /application && composer install
-USER root
+#USER www-data
+#RUN cd /application && composer install
+#USER root
 
 EXPOSE 1597
 
